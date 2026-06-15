@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 export const connectDB = () => {
   mongoose
     .connect(process.env.MONGO_URI, {
-      dbName: "LIBRARY MANAGAMENT SYSTEM",
+      dbName: "LIBRARY_MANAGEMENT_SYSTEM",
     })
     .then(() => {
       console.log("Database connected successfully");

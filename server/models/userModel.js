@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
 
 const userSchema = new mongoose.Schema(
   {
@@ -64,8 +65,8 @@ const userSchema = new mongoose.Schema(
 
 userSchema.methods.generateVerificationCode = function () {
   function generateRandomFiveDigitNumber() {
-    const firstDigit = Math.floor(Math.Random() * 9) + 1; //makes first digit non-zero
-    const remainingDigits = Math.floor(Math.Random() * 10000)
+    const firstDigit = Math.floor(Math.random() * 9) + 1; //makes first digit non-zero
+    const remainingDigits = Math.floor(Math.random() * 10000)
       .toString()
       .padStart(4, 0);
 
@@ -78,5 +79,12 @@ userSchema.methods.generateVerificationCode = function () {
 
   return verificationCode;
 };
+
+userSchema.methods.generateToken = function(){
+
+  return jwt.sign({id: this._id}, process.env.JWT_SECRET_KEY, {
+    expiresIn: process.env.JWT_EXPIRE,
+  })
+}
 
 export const User = mongoose.model("User", userSchema);
