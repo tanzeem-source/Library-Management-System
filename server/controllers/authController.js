@@ -4,7 +4,7 @@ import { User } from "../models/userModel.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
-import {sendToken} from "../utils/sendToken.js"
+import { sendToken } from "../utils/sendToken.js";
 
 // API for registering new user
 export const register = catchAsyncErrors(async (req, res, next) => {
@@ -112,20 +112,71 @@ export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
 
     const currentTime = Date.now();
 
-    const verificationCodeExpire = new Date(user.verificationCodeExpire).getTime();
+    const verificationCodeExpire = new Date(
+      user.verificationCodeExpire,
+    ).getTime();
 
-    if (currentTime > verificationCodeExpire){
-      return next(new ErrorHandler("OTP expired", 400))
+    if (currentTime > verificationCodeExpire) {
+      return next(new ErrorHandler("OTP expired", 400));
     }
 
     user.accountVerified = true;
     user.verificationCode = null;
-    user.verificationCodeExpire= null;
-    await user.save({validateModifiedOnly: true});
+    user.verificationCodeExpire = null;
+    await user.save({ validateModifiedOnly: true });
 
     sendToken(user, 200, "AccountVerified", res);
-
   } catch (error) {
     return next(new ErrorHandler("Internal Server Error.", 500));
   }
 });
+
+// API for user login
+export const login = catchAsyncErrors(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return next(new ErrorHandler("Please enter all fields", 400));
+  }
+
+  const user = await User.findOne({ email, accountVerified: true }).select(
+    "+password",
+  );
+
+  if (!user) {
+    return next(new ErrorHandler("Invalid email or password", 400));
+  }
+
+  const isPasswordMatched = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordMatched) {
+    return next(new ErrorHandler("Invalid email or password", 400));
+  }
+
+  sendToken(user, 200, "User login Successfully.", res);
+});
+
+//API for user logout
+export const logout = catchAsyncErrors(async (req, res, next) => {
+  res
+  .status(200)
+    .cookie("token", "", {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+    })
+    .json({
+      success: true,
+      message: "Logged out successfully",
+    });
+});
+
+//API for getting user info
+export const getUser = catchAsyncErrors(async (req, res, next) =>{
+
+  const user = req.user;
+
+  res.status(200).json({
+    success: true,
+    user,
+  })
+})
