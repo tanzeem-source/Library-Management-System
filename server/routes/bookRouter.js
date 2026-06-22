@@ -9,3 +9,4 @@ router.get("/all", isAuthenticated, getAllBooks);
 router.delete("/delete/:id", isAuthenticated, isAuthorized("Admin"), deleteBook);
 
 export default router;
+
