@@ -66,19 +66,17 @@ export const recordBorrowedBook = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-
 //API for returning borrowed book
 export const returnBorrowBook = catchAsyncErrors(async (req, res, next) => {
   const { bookId } = req.params;
   const { email } = req.body;
+  
   const book = await Book.findById(bookId);
-
   if (!book) {
     return next(new ErrorHandler("Book not found", 404));
   }
 
   const user = await User.findOne({ email, accountVerified: true });
-
   if (!user) {
     return next(new ErrorHandler("User not found", 404));
   }
@@ -86,36 +84,35 @@ export const returnBorrowBook = catchAsyncErrors(async (req, res, next) => {
   const borrowedBook = user.borrowedBooks.find(
     (b) => b.bookId.toString() === bookId && b.returned === false,
   );
-
   if (!borrowedBook) {
     return next(new ErrorHandler("You have not borrowed this book.", 400));
   }
 
   const borrow = await Borrow.findOne({
-    "user.book": bookId,       
-    "user.email": email,       
-    "user.returnDate": null,   
+    "user.book": bookId,
+    "user.email": email,
+    "user.returnDate": null,
   });
-
   if (!borrow) {
     return next(new ErrorHandler("You have not borrowed this book.", 400));
   }
 
-  
+  // Update user book record
   borrowedBook.returned = true;
   await user.save();
 
+  // Update book inventory counters
   book.quantity += 1;
   book.availability = book.quantity > 0;
   await book.save();
 
-  
-  borrow.user.returnDate = new Date(); 
+  // Update the master transaction document
+  borrow.user.returnDate = new Date();
+  const fine = calculateFine(borrow.user.dueDate); 
+  borrow.user.fine = fine; 
 
-  const fine = calculateFine(borrow.user.dueDate); // Added .user
-
-  borrow.user.fine = fine; // Added .user
-
+  // 🚨 Force Mongoose to acknowledge changes to the nested 'user' object properties
+  borrow.markModified("user"); 
   await borrow.save();
 
   res.status(200).json({
@@ -129,23 +126,22 @@ export const returnBorrowBook = catchAsyncErrors(async (req, res, next) => {
 
 //API for fetching books details borrowed by a user
 export const borrowedBooks = catchAsyncErrors(async (req, res, next) => {
-
-  const {borrowedBooks} = req.user;
+  const { borrowedBooks } = req.user;
 
   res.status(200).json({
     success: true,
     borrowedBooks,
-  })
+  });
 });
 
 //API for fetching all book details borrowed by all the users
-export const getBorrowedBooksForAdmin = catchAsyncErrors(async (req, res, next) => {
+export const getBorrowedBooksForAdmin = catchAsyncErrors(
+  async (req, res, next) => {
+    const borrowedBooks = await Borrow.find();
 
-  const borrowedBooks = await Borrow.find();
-
-  res.status(200).json({
-    success : true,
-    borrowedBooks,
-  })
-},
+    res.status(200).json({
+      success: true,
+      borrowedBooks,
+    });
+  },
 );
