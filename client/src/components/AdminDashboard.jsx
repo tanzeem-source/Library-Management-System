@@ -30,7 +30,8 @@ ChartJS.register(
 );
 
 const AdminDashboard = () => {
-  return <></>;
+  return <>
+  <div></div></>;
 };
 
 export default AdminDashboard;
