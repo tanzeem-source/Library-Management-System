@@ -9,7 +9,7 @@ const authSlice = createSlice({
         error: null,
         message: null,
         user: null,
-        isAuthenticated: true,
+        isAuthenticated: false,
     },
 
     reducers:{

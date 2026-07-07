@@ -1,40 +1,136 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, Navigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import { login, resetAuthSlice } from "../store/slices/authSlice.js";
+
 import logo from "../assets/black-logo.png";
 import logo_with_title from "../assets/logo-with-title.png";
 
 const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const dispatch = useDispatch();
+
+  const { loading, error, message, isAuthenticated } = useSelector(
+    (state) => state.auth
+  );
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    dispatch(login({ email, password })); 
+  };
+
+  useEffect(() => {
+    if (message) {
+      toast.success(message);
+      dispatch(resetAuthSlice());
+    }
+    if (error) {
+      toast.error(error);
+      dispatch(resetAuthSlice());
+    }
+  }, [dispatch, message, error]); 
+
+
+  if (isAuthenticated) {
+    return <Navigate to={"/"} />;
+  }
+    
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-black">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md text-center">
-        
-        <img src={logo_with_title} alt="Logo" className="mx-auto mb-6 max-h-16" />
-        
-        <h2 className="text-2xl font-bold mb-6">Welcome Back</h2>
-        
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-          <div>
-            <input 
-              type="email" 
-              placeholder="Email Address" 
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black text-black bg-white"
-            />
+    <>
+      <div className="flex flex-col justify-center md:flex-row h-screen">
+        {/* LEFT SIDE */}
+        <div className="w-full md:w-1/2 flex items-center justify-center bg-white p-8 relative ">
+          <div className="max-w-sm w-full">
+            <div className="flex justify-center mb-12">
+              <div className="rounded-full flex items-center justify-center ">
+                <img src={logo} alt="logo" className="h-auto w-24" />
+              </div>
+            </div>
+
+            <h1 className="text-4xl font-medium text-center mb-12 overflow-hidden">
+              Welcome back !!
+            </h1>
+
+            <p className="text-gray-800 text-center mb-12">
+              Please enter your credentials to login
+            </p>
+
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="mb-2">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email"
+                  required
+                  className="w-full px-4 py-3 border border-black rounded-md focus:outline-none "
+                />
+              </div>
+
+              <div className="mb-2">
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  required
+                  className="w-full px-4 py-3 border border-black rounded-md focus:outline-none "
+                />
+              </div>
+              
+              <Link to={"/password/forgot"} className="block font-semibold text-black mb-12 hover:underline">
+                Forgot Password?
+              </Link>
+
+            
+              <div className="block md:hidden font-semibold mt-5 text-center">
+                <p>
+                  New to our Platform?{" "}
+                  <Link to={"/register"} className="text-sm text-gray-500 hover:underline">
+                    Sign Up
+                  </Link>
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="border-2 mt-5 border-black w-full font-semibold bg-black text-white py-2 rounded-lg hover:bg-white hover:text-black transition disabled:opacity-50"
+              >
+                {loading ? "SIGNING IN..." : "SIGN IN"}
+              </button>
+            </form>
           </div>
-          <div>
-            <input 
-              type="password" 
-              placeholder="Password" 
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black text-black bg-white"
-            />
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div className="hidden w-full md:w-1/2 bg-black text-white md:flex flex-col items-center justify-center p-8 rounded-tl-[80px] rounded-bl-[80px] ">
+          <div className="text-center h-[400px]">
+            <div className="flex justify-center mb-12">
+              <img
+                src={logo_with_title}
+                alt="logo"
+                className="h-auto w-80 mb-12"
+              />
+            </div>
+
+            <p className="text-gray-300 mb-12">
+              New to our platform? Sign up now.
+            </p>
+
+            <Link
+              to={"/register"}
+              className="border-2 mt-5 border-white w-full font-semibold bg-black text-white px-8 py-2 rounded-lg hover:bg-white hover:text-black transition"
+            >
+              SIGN UP
+            </Link>
           </div>
-          <button 
-            type="submit" 
-            className="w-full py-2 bg-black text-white font-medium rounded-md hover:bg-gray-800 transition-colors"
-          >
-            Log In
-          </button>
-        </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
