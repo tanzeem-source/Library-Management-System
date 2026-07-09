@@ -3,8 +3,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import logo from "../assets/black-logo.png";
 import logo_with_title from "../assets/logo-with-title.png";
 import { useDispatch, useSelector } from "react-redux";
-// FIX 3: Imported resetAuthSlice
-import { resetPassword, resetAuthSlice } from "../store/slices/authSlice"; 
+import { resetPassword, resetAuthSlice } from "../store/slices/authSlice";
 import toast from "react-hot-toast";
 
 const ResetPassword = () => {
@@ -15,7 +14,7 @@ const ResetPassword = () => {
   const dispatch = useDispatch();
 
   const { loading, error, message, isAuthenticated } = useSelector(
-    (state) => state.auth
+    (state) => state.auth,
   );
 
   const handleResetPassword = (e) => {
@@ -25,7 +24,6 @@ const ResetPassword = () => {
       return toast.error("Passwords do not match");
     }
 
-    // FIX 1: Passing the correct payload data object to the action
     dispatch(resetPassword({ password, confirmPassword }, token));
   };
 
@@ -98,8 +96,7 @@ const ResetPassword = () => {
                 <input
                   type="password"
                   required
-                  // FIX 2: Fixed the typo 'confirmPasswordassword'
-                  value={confirmPassword} 
+                  value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Confirm Password"
                   className="w-full px-4 py-3 border border-black rounded-md focus:outline-none"
