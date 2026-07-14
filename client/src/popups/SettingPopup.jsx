@@ -13,7 +13,6 @@ const SettingPopup = () => {
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.auth);
 
-  // FIXED: Turned this into an async function
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
 
@@ -28,20 +27,13 @@ const SettingPopup = () => {
     data.append("confirmNewPassword", confirmNewPassword);
 
     try {
-      // 1. Wait for the API call to completely finish and succeed
       await dispatch(updatePassword(data)).unwrap();
-      
-      // 2. ONLY called if updatePassword was successful:
       dispatch(toggleSettingPopup());
-      
-      // Optional: Clear out the state fields so they are empty next time it opens
       setCurrentPassword("");
       setNewPassword("");
       setConfirmNewPassword("");
 
     } catch (error) {
-      // If the backend returns an error (e.g., incorrect current password),
-      // it catches here and the popup stays open so the user can fix it.
       console.error("Password update failed: ", error);
     }
   };

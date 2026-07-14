@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import { toggleRecordBookPopup } from "./popUpSlice";
 
 const borrowSlice = createSlice({
   name: "borrow",
@@ -138,6 +139,7 @@ export const recordBorrowBook = (email, id) => async (dispatch) => {
     )
     .then((res) => {
       dispatch(borrowSlice.actions.recordBookSuccess(res.data.message));
+      dispatch(toggleRecordBookPopup());
     })
     .catch((err) => {
       dispatch(borrowSlice.actions.recordBookFailed(err.response.data.message));

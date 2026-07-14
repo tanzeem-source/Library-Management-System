@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import { toggleAddBookPopup } from "./popUpSlice";
 
 const bookSlice = createSlice({
   name: "book",
@@ -54,15 +55,20 @@ export const fetchAllBooks = () => async (dispatch) => {
     .then((res) => {
       dispatch(bookSlice.actions.fetchBooksSuccess(res.data.books));
     })
-    .catch((res) => {
-      dispatch(bookSlice.actions.fetchBooksFailed(err.response.data.message));
+    .catch((error) => {
+      dispatch(
+        bookSlice.actions.fetchBooksFailed(
+          error.response?.data?.message || "Something went wrong",
+        ),
+      );
     });
 };
 
 export const addBook = (data) => async (dispatch) => {
   dispatch(bookSlice.actions.addBookRequest());
+
   await axios
-    .post("http://localhost:4000/api/v1/book/admin/add", {
+    .post("http://localhost:4000/api/v1/book/admin/add", data, {
       withCredentials: true,
       headers: {
         "Content-Type": "application/json",
@@ -70,15 +76,20 @@ export const addBook = (data) => async (dispatch) => {
     })
     .then((res) => {
       dispatch(bookSlice.actions.addBookSuccess(res.data.message));
+
+      dispatch(toggleAddBookPopup());
     })
-    .catch((res) => {
-      dispatch(bookSlice.actions.addBookFailed(err.response.data.message));
+    .catch((error) => {
+      dispatch(
+        bookSlice.actions.addBookFailed(
+          error.response?.data?.message || "Something went wrong",
+        ),
+      );
     });
 };
 
 export const resetBookSlice = () => async (dispatch) => {
-   dispatch(bookSlice.actions.resetBookSlice());
-}
+  dispatch(bookSlice.actions.resetBookSlice());
+};
 
 export default bookSlice.reducer;
-
