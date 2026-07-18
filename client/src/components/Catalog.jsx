@@ -126,7 +126,11 @@ const Catalog = () => {
               <tbody>
                 {booksToDisplay.map((book, index) => {
                   const targetBookId =
-                    book.bookId?._id || book.bookId || book.book || book._id;
+                    book?.user?.book ||
+                    book.bookId?._id ||
+                    book.bookId ||
+                    book.book ||
+                    book._id;
 
                   return (
                     <tr

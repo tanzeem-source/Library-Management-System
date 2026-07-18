@@ -43,9 +43,9 @@ const BookManagement = () => {
   };
 
   const openRecordBookPopup = (bookId) => {
-    setBorrowBookId(bookId);
-    dispatch(toggleRecordBookPopup());
-  };
+  setBorrowBookId(bookId);
+  dispatch(toggleRecordBookPopup());
+};
 
   useEffect(() => {
     if (message || borrowSliceMessage) {

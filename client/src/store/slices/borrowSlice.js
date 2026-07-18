@@ -124,27 +124,32 @@ export const fetchAllBorrowedBooks = () => async (dispatch) => {
     });
 };
 
-export const recordBorrowBook = (email, id) => async (dispatch) => {
-  dispatch(borrowSlice.actions.recordBookRequest());
-  await axios
-    .post(
-      `http://localhost:4000/api/v1/borrow/record-borrow-book/${id}`,
-      { email },
-      {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
+export const recordBorrowBook =
+  ({ email, id }) =>
+  async (dispatch) => {
+    dispatch(borrowSlice.actions.recordBookRequest());
+
+    await axios
+      .post(
+        `http://localhost:4000/api/v1/borrow/record-borrow-book/${id}`,
+        { email },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      },
-    )
-    .then((res) => {
-      dispatch(borrowSlice.actions.recordBookSuccess(res.data.message));
-      dispatch(toggleRecordBookPopup());
-    })
-    .catch((err) => {
-      dispatch(borrowSlice.actions.recordBookFailed(err.response.data.message));
-    });
-};
+      )
+      .then((res) => {
+        dispatch(borrowSlice.actions.recordBookSuccess(res.data.message));
+        dispatch(toggleRecordBookPopup());
+      })
+      .catch((err) => {
+        dispatch(
+          borrowSlice.actions.recordBookFailed(err.response.data.message),
+        );
+      });
+  };
 
 export const returnBook = (email, id) => async (dispatch) => {
   dispatch(borrowSlice.actions.returnBookRequest());
